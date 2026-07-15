@@ -1,0 +1,25 @@
+{
+  "name": "stripe-login-screen-bdd",
+  "version": "1.0.0",
+  "description": "Cucumber BDD automation for Stripe Dashboard Login using Playwright + TypeScript",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:happy": "cucumber-js --tags @happy-path",
+    "test:validation": "cucumber-js --tags @validation",
+    "test:navigation": "cucumber-js --tags @navigation",
+    "test:security": "cucumber-js --tags @security",
+    "test:report": "cucumber-js && node generate-report.js"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.44.0",
+    "playwright": "^1.44.0"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.6.0",
+    "@types/node": "^20.12.0",
+    "typescript": "^5.4.5",
+    "ts-node": "^10.9.2",
+    "multiple-cucumber-html-reporter": "^3.6.0",
+    "dotenv": "^16.4.5"
+  }
+}
