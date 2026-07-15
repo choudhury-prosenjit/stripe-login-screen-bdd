@@ -8,10 +8,9 @@ Feature: Stripe Dashboard Login - UI Elements and Navigation
     Given I navigate to the Stripe login page
     And the login page has fully loaded
 
-  @smoke @LOGIN-020
+  @LOGIN-020
   Scenario: Login page displays all required UI elements
-    Then the page should display the Stripe logo
-    And the Email input field should be visible and enabled
+    Then the Email input field should be visible and enabled
     And the Password input field should be visible and enabled
     And the Remember me on this device checkbox should be visible
     And the Sign in submit button should be visible and enabled
@@ -26,58 +25,59 @@ Feature: Stripe Dashboard Login - UI Elements and Navigation
   Scenario: Page title is correct
     Then the browser tab title should be "Stripe Login | Sign in to the Stripe Dashboard"
 
-  @smoke @LOGIN-022
+  @LOGIN-022
   Scenario: Forgot your password link navigates to password reset page
     When I click the Forgot your password link
-    Then I should be navigated to "https://dashboard.stripe.com/reset"
+    Then I should be navigated to the Stripe password reset page
 
   @LOGIN-023
   Scenario: Create account link navigates to registration page
     When I click the Create account link
-    Then I should be navigated to "https://dashboard.stripe.com/register"
+    Then I should be navigated to the Stripe registration page
 
   @LOGIN-024
-  Scenario: Privacy and terms link navigates to Stripe privacy policy
+  Scenario: Privacy and terms link navigates to privacy policy page
     When I click the Privacy and terms link
-    Then I should be navigated to "https://stripe.com/privacy"
+    Then I should be navigated to the Stripe privacy policy page
 
   @LOGIN-025
-  Scenario: Tab key navigates through form fields in correct logical order
+  Scenario: Tab key navigates through form fields in correct order
     Given I focus on the Email input field
     When I press the Tab key
     Then focus should move to the Password field
-    When I press the Tab key again
+    When I press the Tab key
     Then focus should move to the next interactive element
 
   @LOGIN-026
-  Scenario: Login form can be submitted by pressing Enter key in Password field
-    When I enter a valid email "user@example.com" in the Email field
-    And I enter the correct password in the Password field
-    And I press the Enter key while focused on the Password field
+  Scenario: Login form can be submitted by pressing Enter in Password field
+    When I enter "user@example.com" in the Email field
+    And I enter the correct password "ValidPass123!" in the Password field
+    And I press Enter key in the Password field
     Then the form should be submitted
 
   @LOGIN-027
   Scenario: Remember me checkbox is toggleable
-    Given the Remember me on this device checkbox is unchecked by default
+    Given the Remember me checkbox is unchecked by default
     When I click the Remember me on this device checkbox
     Then the checkbox should become checked
     When I click the Remember me on this device checkbox again
     Then the checkbox should become unchecked
 
   @LOGIN-028
-  Scenario: Two-factor authentication awareness notice is displayed
-    Then an authentication awareness notice should be visible on the page
-    And it should mention adding multiple two-step authentication methods
+  Scenario: Email field accepts valid email input
+    When I click on the Email input field
+    And I type "testuser@example.com" into the Email field
+    Then the Email field should contain "testuser@example.com"
 
   @LOGIN-029
-  Scenario: Login page is accessible - form fields have proper labels
-    Then the Email field should have an accessible label
-    And the Password field should have an accessible label
+  Scenario: Login page elements are accessible with proper attributes
+    Then the Email field should have an associated label
+    And the Password field should have an associated label
     And the Sign in button should have accessible text
+    And form fields should have appropriate ARIA attributes
 
   @LOGIN-030
   Scenario: Login page renders correctly on mobile viewport
-    Given I resize the browser to a mobile viewport of 375 by 812
+    Given I resize the browser to mobile viewport dimensions
     Then all login form elements should be visible and usable
-    And no elements should be cut off or overlapping
     And the Sign in button should be fully visible

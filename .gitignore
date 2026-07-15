@@ -3,6 +3,5 @@ dist/
 reports/
 .env
 *.log
-.playwright-mcp/
 test-results/
 playwright-report/

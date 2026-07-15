@@ -1,64 +1,50 @@
-import { Before, After, BeforeAll, AfterAll, Status, setDefaultTimeout } from '@cucumber/cucumber';
-import { Browser, BrowserContext, Page, chromium, firefox, webkit } from '@playwright/test';
+import { Before, After, BeforeAll, AfterAll, Status } from '@cucumber/cucumber';
 import { CustomWorld } from '../support/world';
-import * as path from 'path';
 import * as fs from 'fs';
-import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-dotenv.config();
-
-setDefaultTimeout(parseInt(process.env.DEFAULT_TIMEOUT ?? '60000'));
-
-let sharedBrowser: Browser;
-
-BeforeAll(async () => {
-  const browserName = (process.env.BROWSER ?? 'chromium') as 'chromium' | 'firefox' | 'webkit';
-  const headless = process.env.HEADLESS !== 'false';
-  const slowMo = parseInt(process.env.SLOW_MO ?? '0');
-
-  const launchers = { chromium, firefox, webkit };
-  sharedBrowser = await launchers[browserName].launch({ headless, slowMo });
-
+BeforeAll(async function () {
   // Ensure reports directory exists
   const reportsDir = path.join(process.cwd(), 'reports');
   if (!fs.existsSync(reportsDir)) {
     fs.mkdirSync(reportsDir, { recursive: true });
   }
+  console.log('\n🎭 Stripe Login BDD Suite starting...');
 });
 
-Before(async function (this: CustomWorld, { pickle }) {
-  this.browser = sharedBrowser;
-  this.context = await this.browser.newContext({
-    viewport: { width: 1280, height: 720 },
-    ignoreHTTPSErrors: false,
-  });
-  this.page = await this.context.newPage();
-
-  // Capture response headers for security tests
-  this.responseHeaders = {};
-  this.page.on('response', (response) => {
-    if (response.url().includes('dashboard.stripe.com/login') && response.status() === 200) {
-      const headers = response.headers();
-      Object.assign(this.responseHeaders, headers);
-    }
-  });
+Before(async function (this: CustomWorld, scenario) {
+  console.log(`\n▶ Starting: ${scenario.pickle.name}`);
+  await this.init();
 });
 
-After(async function (this: CustomWorld, { result }) {
-  // Take screenshot on failure
-  if (result?.status === Status.FAILED) {
+After(async function (this: CustomWorld, scenario) {
+  if (scenario.result?.status === Status.FAILED) {
     try {
-      const screenshot = await this.page.screenshot({ fullPage: true });
-      await this.attach(screenshot, 'image/png');
-    } catch {
-      // Page may already be closed
+      const screenshotDir = path.join(process.cwd(), 'reports', 'screenshots');
+      if (!fs.existsSync(screenshotDir)) {
+        fs.mkdirSync(screenshotDir, { recursive: true });
+      }
+      const sanitizedName = scenario.pickle.name
+        .replace(/[^a-z0-9]/gi, '_')
+        .toLowerCase()
+        .substring(0, 60);
+      const screenshotPath = path.join(screenshotDir, `${sanitizedName}_${Date.now()}.png`);
+      await this.page.screenshot({ path: screenshotPath, fullPage: true });
+      console.log(`  📸 Screenshot saved: ${screenshotPath}`);
+
+      const screenshot = fs.readFileSync(screenshotPath);
+      this.attach(screenshot, 'image/png');
+    } catch (e) {
+      console.error('  ⚠ Screenshot failed:', e);
     }
   }
 
-  await this.page?.close();
-  await this.context?.close();
+  const statusIcon = scenario.result?.status === Status.PASSED ? '✅' : '❌';
+  console.log(`${statusIcon} Finished: ${scenario.pickle.name} [${scenario.result?.status}]`);
+
+  await this.teardown();
 });
 
-AfterAll(async () => {
-  await sharedBrowser?.close();
+AfterAll(async function () {
+  console.log('\n🏁 Stripe Login BDD Suite completed.');
 });
